@@ -97,14 +97,16 @@ This allows business users to make data-driven decisions.
 
 1. Install dependencies  
 ```bash
-
 pip install -r requirements.txt
 
 ```
 2. Train the model
-   
-   python src/model/train.py
+```bash
+python src/model/train.py
 
+```
 4. start the dashboard
-   
-   streamlit run src/dashboard/app.py
+```bash
+streamlit run src/dashboard/app.py
+
+```
