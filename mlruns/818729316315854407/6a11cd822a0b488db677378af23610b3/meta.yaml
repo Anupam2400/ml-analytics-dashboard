@@ -1,0 +1,14 @@
+artifact_uri: file:///home/administrator/Videos/personal/ml-analytics-dashboard/mlruns/818729316315854407/6a11cd822a0b488db677378af23610b3/artifacts
+end_time: 1768760054321
+entry_point_name: ''
+experiment_id: '818729316315854407'
+lifecycle_stage: active
+run_id: 6a11cd822a0b488db677378af23610b3
+run_name: exultant-squid-818
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1768760052951
+status: 4
+tags: []
+user_id: administrator

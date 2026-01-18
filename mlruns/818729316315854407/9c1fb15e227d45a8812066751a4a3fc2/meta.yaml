@@ -1,0 +1,14 @@
+artifact_uri: file:///home/administrator/Videos/personal/ml-analytics-dashboard/mlruns/818729316315854407/9c1fb15e227d45a8812066751a4a3fc2/artifacts
+end_time: 1768760122939
+entry_point_name: ''
+experiment_id: '818729316315854407'
+lifecycle_stage: active
+run_id: 9c1fb15e227d45a8812066751a4a3fc2
+run_name: rare-ram-686
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1768760096095
+status: 3
+tags: []
+user_id: administrator

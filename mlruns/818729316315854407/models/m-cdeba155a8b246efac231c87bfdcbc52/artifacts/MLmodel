@@ -1,0 +1,22 @@
+artifact_path: file:///home/administrator/Videos/personal/ml-analytics-dashboard/mlruns/818729316315854407/models/m-cdeba155a8b246efac231c87bfdcbc52/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.10.12
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.7.2
+mlflow_version: 3.8.1
+model_id: m-cdeba155a8b246efac231c87bfdcbc52
+model_size_bytes: 197404
+model_uuid: m-cdeba155a8b246efac231c87bfdcbc52
+prompts: null
+run_id: 9c1fb15e227d45a8812066751a4a3fc2
+utc_time_created: '2026-01-18 18:15:20.120894'

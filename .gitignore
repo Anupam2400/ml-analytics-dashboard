@@ -1,0 +1,40 @@
+# This is a condensed example. For a comprehensive template, see the original source or online generators.
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.whl
+
+# Virtual environment
+# It is recommended not to include the virtual environment directory in version control.
+.venv/
+venv/
+env/
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+htmlcov/
+.coverage
+.pytest_cache/
+
+# Sphinx documentation
+docs/_build/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Editor-specific files
+.idea/  # For PyCharm/IntelliJ
+.vscode/ # For VS Code
+.DS_Store # macOS system files
+*.log # General log files
+
+# Secrets and credentials (add specific files as needed)
+.env
