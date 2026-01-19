@@ -34,5 +34,5 @@ def load_data(path: Path = RAW_DATA_PATH) -> pd.DataFrame:
 
 if __name__ == "__main__":
     df = load_data()
-    print(f"Dataset loaded: {df.shape}")
+    print(f"Dataset loaded check: {df.shape}")
 
