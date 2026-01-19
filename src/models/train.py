@@ -7,10 +7,11 @@ from sklearn.metrics import accuracy_score, roc_auc_score
 
 from src.ingestion.load_data import load_data
 from src.tracking.mlflow_config import setup_mlflow
+from src.preprocessing.features import build_features
 
 def train():
     setup_mlflow()
-    df = load_data()
+    df = build_features(load_data())
 
     x = df.drop(columns=["Churn", "customerID"])
     y = df["Churn"].map({"Yes": 1, "No": 0})
