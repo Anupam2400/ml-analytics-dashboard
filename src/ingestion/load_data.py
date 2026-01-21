@@ -1,7 +1,12 @@
 import pandas as pd
 from pathlib import Path
 
-RAW_DATA_PATH = Path("data/raw/Telco_Cusomer_Churn.csv")
+# Resolve the raw data path relative to the project root (two levels up from
+# this file: src/ingestion/load_data.py -> project_root). This makes the
+# loader work regardless of the current working directory when running
+# scripts.
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+RAW_DATA_PATH = PROJECT_ROOT / "data" / "raw" / "Telco_Cusomer_Churn.csv"
 
 REQUIRED_COLUMNS = [
 
