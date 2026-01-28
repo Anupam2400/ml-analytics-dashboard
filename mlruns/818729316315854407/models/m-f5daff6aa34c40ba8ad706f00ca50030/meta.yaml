@@ -1,0 +1,10 @@
+artifact_location: file:///home/administrator/Videos/personal/ml-analytics-dashboard/mlruns/818729316315854407/models/m-f5daff6aa34c40ba8ad706f00ca50030/artifacts
+creation_timestamp: 1769106360731
+experiment_id: '818729316315854407'
+last_updated_timestamp: 1769106364662
+model_id: m-f5daff6aa34c40ba8ad706f00ca50030
+model_type: null
+name: model
+source_run_id: 1105f6c273d54235956d0510d188c7a0
+status: 2
+status_message: null

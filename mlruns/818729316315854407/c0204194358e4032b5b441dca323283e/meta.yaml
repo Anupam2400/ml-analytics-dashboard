@@ -1,0 +1,14 @@
+artifact_uri: file:///home/administrator/Videos/personal/ml-analytics-dashboard/mlruns/818729316315854407/c0204194358e4032b5b441dca323283e/artifacts
+end_time: 1769621548549
+entry_point_name: ''
+experiment_id: '818729316315854407'
+lifecycle_stage: active
+run_id: c0204194358e4032b5b441dca323283e
+run_name: RandomForest
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1769621543783
+status: 3
+tags: []
+user_id: anupa

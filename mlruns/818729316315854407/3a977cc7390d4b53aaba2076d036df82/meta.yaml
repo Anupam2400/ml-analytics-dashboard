@@ -1,0 +1,14 @@
+artifact_uri: file:///home/administrator/Videos/personal/ml-analytics-dashboard/mlruns/818729316315854407/3a977cc7390d4b53aaba2076d036df82/artifacts
+end_time: 1769621543766
+entry_point_name: ''
+experiment_id: '818729316315854407'
+lifecycle_stage: active
+run_id: 3a977cc7390d4b53aaba2076d036df82
+run_name: LogisticRegression
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1769621535713
+status: 3
+tags: []
+user_id: anupa
