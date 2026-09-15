@@ -34,6 +34,22 @@ RANDOM_FOREST_PARAMS = {
     "random_state": RANDOM_STATE,
 }
 
+XGBOOST_PARAMS = {
+    "n_estimators": 200,
+    "max_depth": 6,
+    "learning_rate": 0.05,
+    "eval_metric": "logloss",
+    "random_state": RANDOM_STATE,
+}
+
+LIGHTGBM_PARAMS = {
+    "n_estimators": 200,
+    "max_depth": 6,
+    "learning_rate": 0.05,
+    "verbose": -1,
+    "random_state": RANDOM_STATE,
+}
+
 # ── Feature engineering ─────────────────────────────────────────────
 REQUIRED_COLUMNS = [
     "customerID",

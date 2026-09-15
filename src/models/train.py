@@ -51,7 +51,6 @@
 
 ########################### model comparison version ###########################
 
-from anyio import Path
 import pandas as pd
 import mlflow
 import mlflow.sklearn
@@ -61,6 +60,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, roc_auc_score
+from xgboost import XGBClassifier
+from lightgbm import LGBMClassifier
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
@@ -69,6 +70,14 @@ if str(PROJECT_ROOT) not in sys.path:
 from src.ingestion.load_data import load_data
 from src.preprocessing.features import build_features
 from src.tracking.mlflow_config import setup_mlflow
+from src.config import (
+    LOGISTIC_REGRESSION_PARAMS,
+    RANDOM_FOREST_PARAMS,
+    XGBOOST_PARAMS,
+    LIGHTGBM_PARAMS,
+    TEST_SIZE,
+    RANDOM_STATE,
+)
 
 
 def train_model(model, X_train, X_test, y_train, y_test, model_name):
@@ -99,25 +108,35 @@ def train():
     X = pd.get_dummies(X, drop_first=True)
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
+        X, y, test_size=TEST_SIZE, random_state=RANDOM_STATE
     )
 
     # 1️⃣ Logistic Regression (baseline)
     train_model(
-        LogisticRegression(max_iter=500),
+        LogisticRegression(**LOGISTIC_REGRESSION_PARAMS),
         X_train, X_test, y_train, y_test,
         "LogisticRegression"
     )
 
-    # 2️⃣ Random Forest (improved)
+    # 2️⃣ Random Forest
     train_model(
-        RandomForestClassifier(
-            n_estimators=200,
-            max_depth=8,
-            random_state=42
-        ),
+        RandomForestClassifier(**RANDOM_FOREST_PARAMS),
         X_train, X_test, y_train, y_test,
         "RandomForest"
+    )
+
+    # 3️⃣ XGBoost
+    train_model(
+        XGBClassifier(**XGBOOST_PARAMS),
+        X_train, X_test, y_train, y_test,
+        "XGBoost"
+    )
+
+    # 4️⃣ LightGBM
+    train_model(
+        LGBMClassifier(**LIGHTGBM_PARAMS),
+        X_train, X_test, y_train, y_test,
+        "LightGBM"
     )
 
 
