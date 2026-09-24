@@ -3,7 +3,11 @@ import pandas as pd
 from pathlib import Path
 import sys
 import matplotlib.pyplot as plt
-import seaborn as sns
+
+st.set_page_config(
+    page_title="Churn Analytics Dashboard",
+    layout="wide"
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
@@ -19,11 +23,6 @@ tab1, tab2, tab3 = st.tabs([
     "🧠 Model Insights"
 ])
 
-st.set_page_config(
-    page_title="Churn Analytics Dashboard",
-    layout="wide"
-)
-
 st.markdown("###")
 
 st.title("📊 Customer Churn Analytics Dashboard")
@@ -35,10 +34,7 @@ df = build_features(load_data())
 model, metrics = load_best_model()
 
 # Prepare features
-X = pd.get_dummies(
-    df.drop(columns=["Churn", "customerID"]),
-    drop_first=True
-)
+X = df.drop(columns=["Churn", "customerID"])
 
 # Predictions
 df["churn_probability"] = model.predict_proba(X)[:, 1]
@@ -66,24 +62,26 @@ st.dataframe(
 )
 st.subheader("Top Drivers of Churn")
 
-if hasattr(model, "feature_importances_"):
-    importances = model.feature_importances_
-    feature_names = X.columns
+if hasattr(model, "named_steps") and "classifier" in model.named_steps:
+    classifier = model.named_steps["classifier"]
+    if hasattr(classifier, "feature_importances_"):
+        importances = classifier.feature_importances_
+        feature_names = model.named_steps["preprocessor"].get_feature_names_out()
 
-    fi = (
-        pd.DataFrame({
-            "feature": feature_names,
-            "importance": importances
-        })
-        .sort_values("importance", ascending=False)
-        .head(10)
-    )
+        fi = (
+            pd.DataFrame({
+                "feature": feature_names,
+                "importance": importances
+            })
+            .sort_values("importance", ascending=False)
+            .head(10)
+        )
 
-    fig, ax = plt.subplots()
-    ax.barh(fi["feature"], fi["importance"])
-    ax.invert_yaxis()
-    ax.set_xlabel("Importance")
-    st.pyplot(fig)
+        fig, ax = plt.subplots()
+        ax.barh(fi["feature"], fi["importance"])
+        ax.invert_yaxis()
+        ax.set_xlabel("Importance")
+        st.pyplot(fig)
 else:
     st.info("Feature importance not available for this model.")
     
@@ -139,23 +137,25 @@ with tab3:
     st.subheader("Model Performance")
     st.write(metrics)
 
-    if hasattr(model, "feature_importances_"):
-        importances = model.feature_importances_
-        feature_names = X.columns
+    if hasattr(model, "named_steps") and "classifier" in model.named_steps:
+        classifier = model.named_steps["classifier"]
+        if hasattr(classifier, "feature_importances_"):
+            importances = classifier.feature_importances_
+            feature_names = model.named_steps["preprocessor"].get_feature_names_out()
 
-        fi = (
-            pd.DataFrame({
-                "feature": feature_names,
-                "importance": importances
-            })
-            .sort_values("importance", ascending=False)
-            .head(10)
-        )
+            fi = (
+                pd.DataFrame({
+                    "feature": feature_names,
+                    "importance": importances
+                })
+                .sort_values("importance", ascending=False)
+                .head(10)
+            )
 
-        fig, ax = plt.subplots()
-        ax.barh(fi["feature"], fi["importance"])
-        ax.invert_yaxis()
-        st.pyplot(fig)
+            fig, ax = plt.subplots()
+            ax.barh(fi["feature"], fi["importance"])
+            ax.invert_yaxis()
+            st.pyplot(fig)
 
 st.subheader("Model Metrics")
 st.write(metrics)

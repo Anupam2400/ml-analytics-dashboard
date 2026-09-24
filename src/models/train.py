@@ -60,6 +60,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, roc_auc_score
+from sklearn.pipeline import Pipeline
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
 
@@ -68,7 +69,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.ingestion.load_data import load_data
-from src.preprocessing.features import build_features
+from src.preprocessing.features import build_features, create_preprocessor
 from src.tracking.mlflow_config import setup_mlflow
 from src.config import (
     LOGISTIC_REGRESSION_PARAMS,
@@ -80,12 +81,27 @@ from src.config import (
 )
 
 
-def train_model(model, X_train, X_test, y_train, y_test, model_name):
-    with mlflow.start_run(run_name=model_name):
-        model.fit(X_train, y_train)
+def train_model(
+    model,
+    X_train,
+    X_test,
+    y_train,
+    y_test,
+    model_name,
+    preprocessor=None,
+):
+    fitted_model = model
+    if preprocessor is not None:
+        fitted_model = Pipeline([
+            ("preprocessor", preprocessor),
+            ("classifier", model),
+        ])
 
-        preds = model.predict(X_test)
-        proba = model.predict_proba(X_test)[:, 1]
+    with mlflow.start_run(run_name=model_name):
+        fitted_model.fit(X_train, y_train)
+
+        preds = fitted_model.predict(X_test)
+        proba = fitted_model.predict_proba(X_test)[:, 1]
 
         acc = accuracy_score(y_test, preds)
         roc = roc_auc_score(y_test, proba)
@@ -93,9 +109,10 @@ def train_model(model, X_train, X_test, y_train, y_test, model_name):
         mlflow.log_param("model", model_name)
         mlflow.log_metric("accuracy", acc)
         mlflow.log_metric("roc_auc", roc)
-        mlflow.sklearn.log_model(model, "model")
+        mlflow.sklearn.log_model(fitted_model, "model")
 
         print(f"{model_name} → Accuracy: {acc:.4f}, ROC-AUC: {roc:.4f}")
+        return float(acc), float(roc)
 
 
 def train():
@@ -105,8 +122,6 @@ def train():
     X = df.drop(columns=["Churn", "customerID"])
     y = df["Churn"].map({"Yes": 1, "No": 0})
 
-    X = pd.get_dummies(X, drop_first=True)
-
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=TEST_SIZE, random_state=RANDOM_STATE
     )
@@ -115,28 +130,32 @@ def train():
     train_model(
         LogisticRegression(**LOGISTIC_REGRESSION_PARAMS),
         X_train, X_test, y_train, y_test,
-        "LogisticRegression"
+        "LogisticRegression",
+        create_preprocessor(),
     )
 
     # 2️⃣ Random Forest
     train_model(
         RandomForestClassifier(**RANDOM_FOREST_PARAMS),
         X_train, X_test, y_train, y_test,
-        "RandomForest"
+        "RandomForest",
+        create_preprocessor(),
     )
 
     # 3️⃣ XGBoost
     train_model(
         XGBClassifier(**XGBOOST_PARAMS),
         X_train, X_test, y_train, y_test,
-        "XGBoost"
+        "XGBoost",
+        create_preprocessor(),
     )
 
     # 4️⃣ LightGBM
     train_model(
         LGBMClassifier(**LIGHTGBM_PARAMS),
         X_train, X_test, y_train, y_test,
-        "LightGBM"
+        "LightGBM",
+        create_preprocessor(),
     )
 
 
