@@ -1,5 +1,8 @@
+import os
 import mlflow
 from pathlib import Path
+
+os.environ["MLFLOW_ALLOW_FILE_STORE"] = "true"
 
 EXPERIMENT_NAME = "Churn_prediction"
 MLRUNS_PATH = Path("mlruns")

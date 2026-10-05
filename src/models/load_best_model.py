@@ -43,9 +43,12 @@
 #     return model, best_run.data.metrics
 
 
+import os
 import mlflow
 from mlflow.tracking import MlflowClient
 from pathlib import Path
+
+os.environ["MLFLOW_ALLOW_FILE_STORE"] = "true"
 
 def load_best_model(experiment_name="Churn_prediction"):
 

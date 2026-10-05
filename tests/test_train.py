@@ -1,9 +1,12 @@
 """Tests for the model training module."""
 
+import os
 import pandas as pd
 import pytest
 
 from src.models.train import train_model
+
+os.environ["MLFLOW_ALLOW_FILE_STORE"] = "true"
 
 
 class TestTrainModel:
