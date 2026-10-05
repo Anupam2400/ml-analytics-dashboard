@@ -3,3 +3,6 @@ pandas
 numpy
 xgboost
 lightgbm
+scikit-learn
+streamlit
+pytest
