@@ -2,10 +2,10 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 import sys
-import matplotlib.pyplot as plt
 
 st.set_page_config(
     page_title="Churn Analytics Dashboard",
+    page_icon=":material/analytics:",
     layout="wide"
 )
 
@@ -17,145 +17,90 @@ from src.ingestion.load_data import load_data
 from src.preprocessing.features import build_features
 from src.models.load_best_model import load_best_model
 
-tab1, tab2, tab3 = st.tabs([
-    "📊 Overview",
-    "📈 Risk Analysis",
-    "🧠 Model Insights"
-])
+@st.cache_data
+def get_data():
+    return build_features(load_data())
 
-st.markdown("###")
+@st.cache_resource
+def get_model():
+    return load_best_model()
 
-st.title("📊 Customer Churn Analytics Dashboard")
+st.title("Customer Churn Analytics", icon=":material/dashboard:")
 
-# Load data
-df = build_features(load_data())
+# Load data and model
+with st.spinner("Loading data and model..."):
+    df = get_data()
+    model, metrics = get_model()
 
-# Load best model
-model, metrics = load_best_model()
-
-# Prepare features
+# Prepare features and predictions
 X = df.drop(columns=["Churn", "customerID"])
-
-# Predictions
 df["churn_probability"] = model.predict_proba(X)[:, 1]
 
-# KPIs
-col1, col2, col3 = st.columns(3)
-col1.metric("Total Customers", len(df))
-col2.metric("Churn Rate", f"{df['Churn'].value_counts(normalize=True)['Yes']*100:.2f}%")
-col3.metric("Avg Churn Probability", f"{df['churn_probability'].mean():.2f}")
+tab1, tab2, tab3 = st.tabs([
+    "Overview",
+    "Risk Analysis",
+    "Model Insights"
+])
 
-st.subheader("Churn Distribution")
-
-fig, ax = plt.subplots()
-df["Churn"].value_counts().plot(kind="bar", ax=ax)
-ax.set_xlabel("Churn")
-ax.set_ylabel("Number of Customers")
-st.pyplot(fig)
-
-# Table
-st.subheader("High Risk Customers")
-st.dataframe(
-    df.sort_values("churn_probability", ascending=False)[
-        ["customerID", "churn_probability"]
-    ].head(20)
-)
-st.subheader("Top Drivers of Churn")
-
-if hasattr(model, "named_steps") and "classifier" in model.named_steps:
-    classifier = model.named_steps["classifier"]
-    if hasattr(classifier, "feature_importances_"):
-        importances = classifier.feature_importances_
-        feature_names = model.named_steps["preprocessor"].get_feature_names_out()
-
-        fi = (
-            pd.DataFrame({
-                "feature": feature_names,
-                "importance": importances
-            })
-            .sort_values("importance", ascending=False)
-            .head(10)
-        )
-
-        fig, ax = plt.subplots()
-        ax.barh(fi["feature"], fi["importance"])
-        ax.invert_yaxis()
-        ax.set_xlabel("Importance")
-        st.pyplot(fig)
-else:
-    st.info("Feature importance not available for this model.")
-    
 with tab1:
-    st.title("📊 Customer Churn Overview")
+    st.subheader("Overview", icon=":material/bar_chart:")
+    with st.container(horizontal=True):
+        st.metric("Total Customers", f"{len(df):,}", border=True)
+        st.metric("Churn Rate", f"{df['Churn'].value_counts(normalize=True).get('Yes', 0)*100:.2f}%", border=True)
+        st.metric("Avg Risk Score", f"{df['churn_probability'].mean():.2f}", border=True)
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
+    with col1:
+        with st.container(border=True):
+            st.subheader("Churn Distribution", icon=":material/pie_chart:")
+            churn_counts = df["Churn"].value_counts().reset_index()
+            churn_counts.columns = ["Churn", "Count"]
+            st.bar_chart(churn_counts, x="Churn", y="Count")
+            
+    with col2:
+        with st.container(border=True):
+            st.subheader("Top Drivers of Churn", icon=":material/trending_up:")
+            if hasattr(model, "named_steps") and "classifier" in model.named_steps:
+                classifier = model.named_steps["classifier"]
+                if hasattr(classifier, "feature_importances_"):
+                    importances = classifier.feature_importances_
+                    feature_names = model.named_steps["preprocessor"].get_feature_names_out()
+                    fi = pd.DataFrame({"feature": feature_names, "importance": importances})
+                    fi = fi.sort_values("importance", ascending=False).head(10)
+                    st.bar_chart(fi, x="feature", y="importance")
+            else:
+                st.info("Feature importance not available for this model.")
 
-    col1.metric("Total Customers", f"{len(df):,}")
-    col2.metric(
-        "Churn Rate",
-        f"{df['Churn'].value_counts(normalize=True)['Yes']*100:.2f}%"
-    )
-    col3.metric(
-        "Avg Risk Score",
-        f"{df['churn_probability'].mean():.2f}"
-    )
-
-    st.markdown("---")
-
-    st.subheader("Churn Distribution")
-    fig, ax = plt.subplots()
-    df["Churn"].value_counts().plot(kind="bar", ax=ax)
-    st.pyplot(fig)
-    
 with tab2:
-    st.title("📈 Customer Risk Analysis")
-
-    threshold = st.slider(
-        "Select churn risk threshold",
-        0.0, 1.0, 0.5, 0.05
-    )
-
-    high_risk = df[df["churn_probability"] > threshold]
-
-    st.metric("High Risk Customers", len(high_risk))
-
-    st.subheader("Risk Distribution")
-    fig, ax = plt.subplots()
-    ax.hist(df["churn_probability"], bins=20)
-    st.pyplot(fig)
-
-    st.subheader("Top High-Risk Customers")
-    st.dataframe(
-        high_risk.sort_values("churn_probability", ascending=False)[
-            ["customerID", "churn_probability"]
-        ].head(20)
-    )
+    st.subheader("Risk Analysis", icon=":material/warning:")
     
-with tab3:
-    st.title("🧠 Model Insights")
+    with st.container(border=True):
+        threshold = st.slider("Select churn risk threshold", 0.0, 1.0, 0.5, 0.05)
+        high_risk = df[df["churn_probability"] > threshold]
+        st.metric("High Risk Customers", f"{len(high_risk):,}")
 
-    st.subheader("Model Performance")
-    st.write(metrics)
+    col1, col2 = st.columns(2)
+    with col1:
+        with st.container(border=True):
+            st.subheader("Risk Distribution", icon=":material/analytics:")
+            risk_bins = pd.cut(df["churn_probability"], bins=20).value_counts().sort_index().reset_index()
+            risk_bins.columns = ["Probability Range", "Count"]
+            risk_bins["Probability Range"] = risk_bins["Probability Range"].astype(str)
+            st.bar_chart(risk_bins, x="Probability Range", y="Count")
 
-    if hasattr(model, "named_steps") and "classifier" in model.named_steps:
-        classifier = model.named_steps["classifier"]
-        if hasattr(classifier, "feature_importances_"):
-            importances = classifier.feature_importances_
-            feature_names = model.named_steps["preprocessor"].get_feature_names_out()
-
-            fi = (
-                pd.DataFrame({
-                    "feature": feature_names,
-                    "importance": importances
-                })
-                .sort_values("importance", ascending=False)
-                .head(10)
+    with col2:
+        with st.container(border=True):
+            st.subheader("Top High-Risk Customers", icon=":material/group:")
+            st.dataframe(
+                high_risk.sort_values("churn_probability", ascending=False)[
+                    ["customerID", "churn_probability"]
+                ].head(20),
+                hide_index=True
             )
 
-            fig, ax = plt.subplots()
-            ax.barh(fi["feature"], fi["importance"])
-            ax.invert_yaxis()
-            st.pyplot(fig)
-
-st.subheader("Model Metrics")
-st.write(metrics)
+with tab3:
+    st.subheader("Model Insights", icon=":material/memory:")
+    
+    with st.container(border=True):
+        st.subheader("Model Metrics")
+        st.json(metrics)
