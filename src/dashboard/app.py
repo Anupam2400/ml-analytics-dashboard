@@ -17,11 +17,11 @@ from src.ingestion.load_data import load_data
 from src.preprocessing.features import build_features
 from src.models.load_best_model import load_best_model
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def get_data():
     return build_features(load_data())
 
-@st.cache_resource
+@st.cache_resource(show_spinner=False)
 def get_model():
     return load_best_model()
 
