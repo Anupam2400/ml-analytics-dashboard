@@ -77,7 +77,15 @@ with tab2:
     with st.container(border=True):
         threshold = st.slider("Select churn risk threshold", 0.0, 1.0, 0.5, 0.05)
         high_risk = df[df["churn_probability"] > threshold]
-        st.metric("High Risk Customers", f"{len(high_risk):,}")
+        high_risk_customers = high_risk.sort_values(
+            "churn_probability", ascending=False
+        )
+        with st.container(horizontal=True):
+            st.metric("High-risk customers", f"{len(high_risk_customers):,}")
+            st.metric(
+                "Monthly charges at risk",
+                f"${high_risk_customers['MonthlyCharges'].sum():,.2f}",
+            )
 
     col1, col2 = st.columns(2)
     with col1:
@@ -92,10 +100,19 @@ with tab2:
         with st.container(border=True):
             st.subheader("Top High-Risk Customers", icon=":material/group:")
             st.dataframe(
-                high_risk.sort_values("churn_probability", ascending=False)[
-                    ["customerID", "churn_probability"]
+                high_risk_customers[
+                    ["customerID", "MonthlyCharges", "churn_probability"]
                 ].head(20),
                 hide_index=True
+            )
+            st.download_button(
+                "Download high-risk customers",
+                data=high_risk_customers[
+                    ["customerID", "MonthlyCharges", "churn_probability"]
+                ].to_csv(index=False).encode("utf-8"),
+                file_name="high-risk-customers.csv",
+                mime="text/csv",
+                icon=":material/download:",
             )
 
 with tab3:
