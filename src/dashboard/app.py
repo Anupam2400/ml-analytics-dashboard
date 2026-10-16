@@ -16,6 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from src.ingestion.load_data import load_data
 from src.preprocessing.features import build_features
 from src.models.load_best_model import load_best_model
+from src.models.evaluation import calculate_threshold_metrics
 
 @st.cache_data(show_spinner=False)
 def get_data():
@@ -80,12 +81,26 @@ with tab2:
         high_risk_customers = high_risk.sort_values(
             "churn_probability", ascending=False
         )
+        threshold_metrics = calculate_threshold_metrics(
+            df["Churn"].eq("Yes").astype(int).tolist(),
+            df["churn_probability"].tolist(),
+            threshold,
+        )
         with st.container(horizontal=True):
             st.metric("High-risk customers", f"{len(high_risk_customers):,}")
             st.metric(
                 "Monthly charges at risk",
                 f"${high_risk_customers['MonthlyCharges'].sum():,.2f}",
             )
+
+        st.caption(
+            "Historical-data reference only; these scores are not a holdout evaluation."
+        )
+        with st.container(horizontal=True):
+            st.metric("Reference precision", f"{threshold_metrics['precision']:.1%}")
+            st.metric("Reference recall", f"{threshold_metrics['recall']:.1%}")
+            st.metric("False alarms", f"{threshold_metrics['false_positives']:,}")
+            st.metric("Missed churners", f"{threshold_metrics['false_negatives']:,}")
 
     col1, col2 = st.columns(2)
     with col1:

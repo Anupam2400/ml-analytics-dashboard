@@ -30,6 +30,55 @@ The dashboard helps teams answer questions like:
 
 ---
 
+## 🗺️ Project Roadmap
+
+Work through the milestones in order. The current focus is reliable, reproducible model evaluation; dashboard scores computed on the full dataset are useful for exploration but should not be treated as estimates of performance on unseen customers.
+
+### Phase 1: Reliable evaluation (next)
+
+- [ ] Use a stratified train/validation/test split with a fixed random seed.
+- [ ] Keep preprocessing inside the fitted model pipeline and evaluate only on held-out data.
+- [ ] Log precision, recall, F1, PR-AUC, ROC-AUC, and a confusion matrix to MLflow.
+- [ ] Add tests for split reproducibility, leakage prevention, and metric calculations.
+- [ ] Show held-out metrics in the dashboard and clearly distinguish them from full-dataset descriptive insights.
+
+**Done when:** training and evaluation are reproducible, and the dashboard reports model quality on data excluded from fitting and model selection.
+
+### Phase 2: Useful customer-level insights
+
+- [ ] Add threshold tradeoff charts based on validation data and select a threshold using an explicit business objective.
+- [ ] Add customer-level explanations for individual churn predictions.
+- [ ] Add churn segments by contract, tenure, service type, and monthly charges.
+- [ ] Add a retention scenario calculator with visible assumptions for contact rate, intervention effectiveness, and cost.
+
+**Done when:** a user can understand why a customer is flagged and compare transparent outreach scenarios without confusing correlation with causation.
+
+### Phase 3: Reproducible data and model management
+
+- [ ] Add data-quality checks for schema, missing values, and unexpected categories.
+- [ ] Record dataset and training configuration details with every MLflow run.
+- [ ] Generate a versioned evaluation report when a model is trained.
+- [ ] Add a documented model promotion process so the dashboard loads an explicitly selected model version.
+
+**Done when:** a past model can be tied to its data, configuration, evaluation results, and promotion decision.
+
+### Phase 4: Delivery and monitoring
+
+- [ ] Add CI to run tests and linting on each change.
+- [ ] Containerize the dashboard and document local and hosted deployment.
+- [ ] Add a prediction API if the dashboard needs to integrate with other systems.
+- [ ] Monitor incoming data for drift and evaluate predictions against later-observed churn outcomes.
+
+**Done when:** the project can be deployed repeatably and model health can be reviewed after deployment.
+
+### Current status
+
+- [x] Data ingestion, feature engineering, model comparison, and MLflow tracking.
+- [x] Streamlit dashboard with risk filtering, monthly charges at risk, CSV export, and threshold reference metrics.
+- [ ] Phase 1: reliable held-out evaluation.
+
+---
+
 ## 📊 Dataset Summary
 
 The project uses the **Telco Customer Churn** dataset.
