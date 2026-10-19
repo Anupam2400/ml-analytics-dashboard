@@ -77,8 +77,36 @@ from src.config import (
     XGBOOST_PARAMS,
     LIGHTGBM_PARAMS,
     TEST_SIZE,
+    VALIDATION_SIZE,
     RANDOM_STATE,
 )
+
+
+def split_dataset(X, y):
+    """Return reproducible, stratified train, validation, and test partitions."""
+    X_train_validation, X_test, y_train_validation, y_test = train_test_split(
+        X,
+        y,
+        test_size=TEST_SIZE,
+        random_state=RANDOM_STATE,
+        stratify=y,
+    )
+    validation_fraction = VALIDATION_SIZE / (1 - TEST_SIZE)
+    X_train, X_validation, y_train, y_validation = train_test_split(
+        X_train_validation,
+        y_train_validation,
+        test_size=validation_fraction,
+        random_state=RANDOM_STATE,
+        stratify=y_train_validation,
+    )
+    return (
+        X_train,
+        X_validation,
+        X_test,
+        y_train,
+        y_validation,
+        y_test,
+    )
 
 
 def train_model(
@@ -122,38 +150,40 @@ def train():
     X = df.drop(columns=["Churn", "customerID"])
     y = df["Churn"].map({"Yes": 1, "No": 0})
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=TEST_SIZE, random_state=RANDOM_STATE
-    )
+    (
+        X_train,
+        X_validation,
+        X_test,
+        y_train,
+        y_validation,
+        y_test,
+    ) = split_dataset(X, y)
 
-    # 1️⃣ Logistic Regression (baseline)
+    # Compare models on validation data; reserve the test set for final evaluation.
     train_model(
         LogisticRegression(**LOGISTIC_REGRESSION_PARAMS),
-        X_train, X_test, y_train, y_test,
+        X_train, X_validation, y_train, y_validation,
         "LogisticRegression",
         create_preprocessor(),
     )
 
-    # 2️⃣ Random Forest
     train_model(
         RandomForestClassifier(**RANDOM_FOREST_PARAMS),
-        X_train, X_test, y_train, y_test,
+        X_train, X_validation, y_train, y_validation,
         "RandomForest",
         create_preprocessor(),
     )
 
-    # 3️⃣ XGBoost
     train_model(
         XGBClassifier(**XGBOOST_PARAMS),
-        X_train, X_test, y_train, y_test,
+        X_train, X_validation, y_train, y_validation,
         "XGBoost",
         create_preprocessor(),
     )
 
-    # 4️⃣ LightGBM
     train_model(
         LGBMClassifier(**LIGHTGBM_PARAMS),
-        X_train, X_test, y_train, y_test,
+        X_train, X_validation, y_train, y_validation,
         "LightGBM",
         create_preprocessor(),
     )

@@ -22,6 +22,7 @@ MLFLOW_EXPERIMENT_NAME = "Churn_prediction"
 
 # ── Model training ──────────────────────────────────────────────────
 TEST_SIZE = 0.2
+VALIDATION_SIZE = 0.2
 RANDOM_STATE = 42
 
 LOGISTIC_REGRESSION_PARAMS = {

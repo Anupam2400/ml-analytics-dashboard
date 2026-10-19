@@ -36,7 +36,7 @@ Work through the milestones in order. The current focus is reliable, reproducibl
 
 ### Phase 1: Reliable evaluation (next)
 
-- [ ] Use a stratified train/validation/test split with a fixed random seed.
+- [x] Use a stratified train/validation/test split with a fixed random seed.
 - [ ] Keep preprocessing inside the fitted model pipeline and evaluate only on held-out data.
 - [ ] Log precision, recall, F1, PR-AUC, ROC-AUC, and a confusion matrix to MLflow.
 - [ ] Add tests for split reproducibility, leakage prevention, and metric calculations.
